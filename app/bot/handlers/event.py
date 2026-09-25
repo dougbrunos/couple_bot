@@ -1,0 +1,423 @@
+import logging
+from datetime import datetime, date, time, timedelta
+from telegram import Update
+from telegram.ext import (
+    ContextTypes,
+    ConversationHandler,
+    CommandHandler,
+    MessageHandler,
+    CallbackQueryHandler,
+    filters,
+)
+
+from app.database.database import get_db
+from app.database.models import EventScope, RecurrenceType
+from app.database.repositories.user_repo import UserRepository
+from app.database.repositories.couple_repo import CoupleRepository
+from app.services.event_service import EventService
+from app.bot.states.event_states import (
+    EVENT_TITLE,
+    EVENT_DATE,
+    EVENT_TIME,
+    EVENT_PARTICIPANT,
+    EVENT_RECURRENCE,
+    EVENT_REMINDER,
+    EVENT_CONFIRM,
+)
+from app.bot.keyboards.event_keyboards import (
+    get_cancel_event_keyboard,
+    get_participant_keyboard,
+    get_recurrence_keyboard,
+    get_reminder_keyboard,
+    get_confirm_event_keyboard,
+)
+from app.bot.keyboards.main_menu import get_main_menu_keyboard
+from app.utils.date_utils import (
+    parse_date_input,
+    parse_time_input,
+    get_local_now,
+    combine_to_utc,
+    to_local_tz,
+)
+
+logger = logging.getLogger(__name__)
+
+
+async def start_add_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Inicia o fluxo guiado para criação de um novo evento."""
+    user = update.effective_user
+    if not user:
+        return ConversationHandler.END
+
+    with get_db() as session:
+        db_user = UserRepository.get_by_telegram_id(session, user.id)
+        if not db_user:
+            db_user = UserRepository.create_or_update(session, user.id, user.first_name or "Usuário")
+
+        couple = CoupleRepository.get_by_user_id(session, db_user.id)
+        is_paired = couple is not None and couple.user_2_id is not None
+        partner = CoupleRepository.get_partner(session, db_user.id) if couple else None
+        
+        couple_id = couple.id if couple else None
+        db_user_id = db_user.id
+        partner_id = partner.id if partner else None
+        partner_name = partner.name if partner else "Parceiro(a)"
+
+    if not is_paired or not couple_id:
+        text = (
+            "⚠️ Para criar e organizar eventos, você precisa estar conectado(a) em um casal!\n\n"
+            "Use as opções do menu para criar ou entrar em um casal."
+        )
+        menu_kb = get_main_menu_keyboard(is_paired=False)
+        if update.callback_query:
+            await update.callback_query.answer()
+            await update.callback_query.edit_message_text(text, reply_markup=menu_kb)
+        elif update.message:
+            await update.message.reply_text(text, reply_markup=menu_kb)
+        return ConversationHandler.END
+
+    context.user_data["event_draft"] = {
+        "user_name": user.first_name or "Eu",
+        "partner_name": partner_name,
+        "couple_id": couple_id,
+        "user_id": db_user_id,
+        "partner_id": partner_id,
+    }
+
+    text = "📅 *Qual é o evento?*\n\nExemplo: Jantar, Dentista, Academia"
+    cancel_kb = get_cancel_event_keyboard()
+
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text, reply_markup=cancel_kb, parse_mode="Markdown")
+    elif update.message:
+        await update.message.reply_text(text, reply_markup=cancel_kb, parse_mode="Markdown")
+
+    return EVENT_TITLE
+
+
+async def process_event_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura e valida o título do evento."""
+    if not update.message or not update.message.text:
+        return EVENT_TITLE
+
+    title = update.message.text.strip()
+    if len(title) < 2:
+        await update.message.reply_text(
+            "⚠️ O título é muito curto. Por favor, envie um nome mais descritivo para o evento:",
+            reply_markup=get_cancel_event_keyboard(),
+        )
+        return EVENT_TITLE
+
+    draft = context.user_data.get("event_draft", {})
+    draft["title"] = title
+    context.user_data["event_draft"] = draft
+
+    text = f"📆 *Qual a data para \"{title}\"?*\n\nExemplo: `26/09/2026`"
+    await update.message.reply_text(text, reply_markup=get_cancel_event_keyboard(), parse_mode="Markdown")
+    return EVENT_DATE
+
+
+async def process_event_date(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura e valida a data do evento."""
+    if not update.message or not update.message.text:
+        return EVENT_DATE
+
+    date_str = update.message.text.strip()
+    parsed_date, error = parse_date_input(date_str)
+
+    if error or not parsed_date:
+        await update.message.reply_text(
+            f"⚠️ {error}\n\nPor favor, digite uma data válida (ex: `26/09/2026`):",
+            reply_markup=get_cancel_event_keyboard(),
+            parse_mode="Markdown",
+        )
+        return EVENT_DATE
+
+    draft = context.user_data.get("event_draft", {})
+    draft["date"] = parsed_date
+    context.user_data["event_draft"] = draft
+
+    formatted_date = parsed_date.strftime("%d/%m/%Y")
+    text = f"🕐 *Qual o horário para {formatted_date}?*\n\nExemplo: `20:00`"
+    await update.message.reply_text(text, reply_markup=get_cancel_event_keyboard(), parse_mode="Markdown")
+    return EVENT_TIME
+
+
+async def process_event_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura e valida o horário do evento."""
+    if not update.message or not update.message.text:
+        return EVENT_TIME
+
+    time_str = update.message.text.strip()
+    parsed_time, error = parse_time_input(time_str)
+
+    if error or not parsed_time:
+        await update.message.reply_text(
+            f"⚠️ {error}\n\nPor favor, digite um horário válido (ex: `20:00`):",
+            reply_markup=get_cancel_event_keyboard(),
+            parse_mode="Markdown",
+        )
+        return EVENT_TIME
+
+    draft = context.user_data.get("event_draft", {})
+    event_date: date = draft.get("date")
+
+    local_now = get_local_now()
+    if event_date == local_now.date():
+        if parsed_time < local_now.time():
+            await update.message.reply_text(
+                "⚠️ Esse horário já passou hoje! Por favor, informe um horário futuro (ex: `20:00`):",
+                reply_markup=get_cancel_event_keyboard(),
+                parse_mode="Markdown",
+            )
+            return EVENT_TIME
+
+    draft["time"] = parsed_time
+    context.user_data["event_draft"] = draft
+
+    user_name = draft.get("user_name", "Eu")
+    partner_name = draft.get("partner_name", "Ela")
+    part_kb = get_participant_keyboard(user_name=user_name, partner_name=partner_name)
+
+    text = "👥 *Quem participa desse compromisso?*"
+    await update.message.reply_text(text, reply_markup=part_kb, parse_mode="Markdown")
+    return EVENT_PARTICIPANT
+
+
+async def process_event_participant(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura a escolha de participante (Pessoal, Parceiro ou Compartilhado)."""
+    query = update.callback_query
+    if not query:
+        return EVENT_PARTICIPANT
+
+    await query.answer()
+    data = query.data
+    draft = context.user_data.get("event_draft", {})
+
+    if data == "scope_personal":
+        draft["scope"] = EventScope.PERSONAL
+        draft["owner_id"] = draft.get("user_id")
+    elif data == "scope_partner":
+        draft["scope"] = EventScope.PARTNER
+        draft["owner_id"] = draft.get("partner_id")
+    else:  # scope_shared
+        draft["scope"] = EventScope.SHARED
+        draft["owner_id"] = None
+
+    context.user_data["event_draft"] = draft
+
+    text = "🔁 *Esse evento se repete?*"
+    await query.edit_message_text(text, reply_markup=get_recurrence_keyboard(), parse_mode="Markdown")
+    return EVENT_RECURRENCE
+
+
+async def process_event_recurrence(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura a escolha da regra de recorrência."""
+    query = update.callback_query
+    if not query:
+        return EVENT_RECURRENCE
+
+    await query.answer()
+    data = query.data
+    draft = context.user_data.get("event_draft", {})
+
+    mapping = {
+        "recur_none": RecurrenceType.NONE,
+        "recur_daily": RecurrenceType.DAILY,
+        "recur_weekly": RecurrenceType.WEEKLY,
+        "recur_monthly": RecurrenceType.MONTHLY,
+        "recur_yearly": RecurrenceType.YEARLY,
+    }
+    draft["recurrence_type"] = mapping.get(data, RecurrenceType.NONE)
+    context.user_data["event_draft"] = draft
+
+    text = "🔔 *Quando devo lembrar vocês?*"
+    await query.edit_message_text(text, reply_markup=get_reminder_keyboard(), parse_mode="Markdown")
+    return EVENT_REMINDER
+
+
+async def process_event_reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Captura a antecedência do lembrete e exibe tela de confirmação."""
+    query = update.callback_query
+    if not query:
+        return EVENT_REMINDER
+
+    await query.answer()
+    data = query.data
+    draft = context.user_data.get("event_draft", {})
+
+    reminder_map = {
+        "remind_none": 0,
+        "remind_10": 10,
+        "remind_30": 30,
+        "remind_60": 60,
+        "remind_1440": 1440,
+    }
+    reminder_minutes = reminder_map.get(data, 0)
+    draft["reminder_minutes"] = reminder_minutes
+    context.user_data["event_draft"] = draft
+
+    # Rótulos para o resumo
+    scope_labels = {
+        EventScope.PERSONAL: f"👤 {draft.get('user_name', 'Eu')}",
+        EventScope.PARTNER: f"👩 {draft.get('partner_name', 'Parceira')}",
+        EventScope.SHARED: f"❤️ {draft.get('user_name', 'Eu')} + {draft.get('partner_name', 'Parceira')}",
+    }
+    recurrence_labels = {
+        RecurrenceType.NONE: "Não se repete",
+        RecurrenceType.DAILY: "Diariamente",
+        RecurrenceType.WEEKLY: "Semanalmente",
+        RecurrenceType.MONTHLY: "Mensalmente",
+        RecurrenceType.YEARLY: "Anualmente",
+    }
+    reminder_labels = {
+        0: "Sem lembrete",
+        10: "10 min antes",
+        30: "30 min antes",
+        60: "1 hora antes",
+        1440: "1 dia antes",
+    }
+
+    event_date: date = draft.get("date")
+    event_time: time = draft.get("time")
+    formatted_date = event_date.strftime("%d/%m/%Y")
+    formatted_time = event_time.strftime("%H:%M")
+
+    summary = "📋 *CONFIRMAR EVENTO*\n\n"
+    summary += f"📌 *Título:* {draft.get('title')}\n"
+    summary += f"📆 *Data:* {formatted_date}\n"
+    summary += f"🕐 *Horário:* {formatted_time}\n"
+    summary += f"👥 *Participante:* {scope_labels.get(draft.get('scope'))}\n"
+    summary += f"🔁 *Repetição:* {recurrence_labels.get(draft.get('recurrence_type'))}\n"
+    summary += f"🔔 *Lembrete:* {reminder_labels.get(reminder_minutes)}\n"
+
+    await query.edit_message_text(summary, reply_markup=get_confirm_event_keyboard(), parse_mode="Markdown")
+    return EVENT_CONFIRM
+
+
+async def process_event_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Grava o evento no banco e agenda o lembrete."""
+    query = update.callback_query
+    if not query:
+        return EVENT_CONFIRM
+
+    await query.answer()
+    draft = context.user_data.get("event_draft", {})
+    if not draft or "title" not in draft:
+        await query.edit_message_text("⚠️ Dados do evento não encontrados. Digite /add para tentar novamente.")
+        return ConversationHandler.END
+
+    with get_db() as session:
+        event, reminder = EventService.create_event(
+            session=session,
+            couple_id=draft["couple_id"],
+            created_by=draft["user_id"],
+            title=draft["title"],
+            event_date=draft["date"],
+            event_time=draft["time"],
+            scope=draft["scope"],
+            owner_id=draft.get("owner_id"),
+            recurrence_type=draft["recurrence_type"],
+            reminder_minutes=draft.get("reminder_minutes"),
+        )
+        event_id = event.id
+        reminder_time = reminder.scheduled_at if reminder else None
+        
+        # Recupera telegram_id do parceiro para notificar
+        partner = UserRepository.get_by_id(session, draft["partner_id"]) if draft.get("partner_id") else None
+        partner_tg_id = partner.telegram_id if partner else None
+
+    # Mensagem de sucesso para o criador
+    success_text = "✅ *Evento criado!*\n\n"
+    if reminder_time:
+        local_remind = to_local_tz(reminder_time)
+        success_text += f"Vou lembrar às {local_remind.strftime('%H:%M')} de {local_remind.strftime('%d/%m')}."
+    else:
+        success_text += "Compromisso adicionado à agenda."
+
+    menu_kb = get_main_menu_keyboard(is_paired=True)
+    await query.edit_message_text(success_text, reply_markup=menu_kb, parse_mode="Markdown")
+
+    # Notifica parceiro se for compartilhado ou da parceira
+    if partner_tg_id and draft["scope"] in (EventScope.SHARED, EventScope.PARTNER):
+        partner_notice = (
+            f"📅 *Novo evento adicionado!*\n\n"
+            f"*{draft['title']}*\n"
+            f"📆 {draft['date'].strftime('%d/%m/%Y')} às {draft['time'].strftime('%H:%M')}\n"
+            f"Adicionado por: *{draft['user_name']}*"
+        )
+        try:
+            await context.bot.send_message(
+                chat_id=partner_tg_id,
+                text=partner_notice,
+                reply_markup=menu_kb,
+                parse_mode="Markdown",
+            )
+        except Exception as e:
+            logger.warning(f"Erro ao notificar parceiro sobre novo evento: {e}")
+
+    context.user_data.pop("event_draft", None)
+    return ConversationHandler.END
+
+
+async def cancel_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Cancela o fluxo de criação de evento e limpa o rascunho."""
+    context.user_data.pop("event_draft", None)
+    user = update.effective_user
+    is_paired = False
+    if user:
+        with get_db() as session:
+            db_user = UserRepository.get_by_telegram_id(session, user.id)
+            if db_user:
+                couple = CoupleRepository.get_by_user_id(session, db_user.id)
+                is_paired = couple is not None and couple.user_2_id is not None
+
+    menu_kb = get_main_menu_keyboard(is_paired=is_paired)
+    text = "Criação de evento cancelada."
+
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text, reply_markup=menu_kb)
+    elif update.message:
+        await update.message.reply_text(text, reply_markup=menu_kb)
+
+    return ConversationHandler.END
+
+
+def get_add_event_conversation_handler() -> ConversationHandler:
+    """Retorna o ConversationHandler configurado para criação de evento."""
+    return ConversationHandler(
+        entry_points=[
+            CallbackQueryHandler(start_add_event, pattern="^menu_add_event$"),
+            CommandHandler("add", start_add_event),
+        ],
+        states={
+            EVENT_TITLE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, process_event_title),
+            ],
+            EVENT_DATE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, process_event_date),
+            ],
+            EVENT_TIME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, process_event_time),
+            ],
+            EVENT_PARTICIPANT: [
+                CallbackQueryHandler(process_event_participant, pattern="^scope_(personal|partner|shared)$"),
+            ],
+            EVENT_RECURRENCE: [
+                CallbackQueryHandler(process_event_recurrence, pattern="^recur_(none|daily|weekly|monthly|yearly)$"),
+            ],
+            EVENT_REMINDER: [
+                CallbackQueryHandler(process_event_reminder, pattern="^remind_(none|10|30|60|1440)$"),
+            ],
+            EVENT_CONFIRM: [
+                CallbackQueryHandler(process_event_confirm, pattern="^confirm_event_save$"),
+            ],
+        },
+        fallbacks=[
+            CallbackQueryHandler(cancel_event, pattern="^cancel_event$"),
+            CommandHandler("cancelar", cancel_event),
+        ],
+        per_message=False,
+    )

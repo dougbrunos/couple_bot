@@ -1,0 +1,8 @@
+# Estados do ConversationHandler para criação de evento
+EVENT_TITLE = 10
+EVENT_DATE = 11
+EVENT_TIME = 12
+EVENT_PARTICIPANT = 13
+EVENT_RECURRENCE = 14
+EVENT_REMINDER = 15
+EVENT_CONFIRM = 16

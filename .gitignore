@@ -1,0 +1,43 @@
+# Ambientes virtuais
+.venv/
+venv/
+ENV/
+
+# Python cache e artefatos de build
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Banco de dados e armazenamento local
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Testes e cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs e arquivos do sistema
+*.log
+.DS_Store
+
+# IDEs e editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentação interna de especificação e tarefas
+docs/
+mvp.md
