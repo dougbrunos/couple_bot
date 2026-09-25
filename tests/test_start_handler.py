@@ -89,3 +89,26 @@ async def test_start_callback_query():
 def test_create_app():
     app = create_app()
     assert app is not None
+
+    # Verifica comandos registrados nos handlers
+    commands = set()
+    for handler_list in app.handlers.values():
+        for handler in handler_list:
+            if hasattr(handler, "commands"):
+                commands.update(handler.commands)
+
+    # Verifica comandos em portugues e ingles
+    assert "start" in commands
+    assert "menu" in commands
+    assert "ajuda" in commands
+    assert "help" in commands
+    assert "hoje" in commands
+    assert "today" in commands
+    assert "semana" in commands
+    assert "week" in commands
+    assert "eventos" in commands
+    assert "events" in commands
+    assert "delete" in commands
+    assert "remove" in commands
+    assert "criar_casal" in commands
+    assert "create_couple" in commands

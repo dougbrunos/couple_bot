@@ -21,19 +21,23 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             is_paired = couple is not None and couple.user_2_id is not None
             has_pending_invite = couple is not None and couple.user_2_id is None
 
-    text = "📖 *Guia de Uso do Assistente de Casal*\n\n"
-    text += "Aqui estão os comandos principais que você pode usar:\n\n"
-    text += "• /start ou /menu — Abre o menu principal de navegação.\n"
-    text += "• /ajuda — Mostra esta mensagem de ajuda.\n"
+    text = "📖 *Guia de Uso e Comandos | Commands & User Guide*\n\n"
+    text += "Você pode usar comandos em Português ou Inglês:\n"
+    text += "_You can use commands in either Portuguese or English:_\n\n"
+    text += "• /start | /menu — Menu principal / Main menu\n"
+    text += "• /ajuda | /help — Guia de ajuda / Help guide\n"
 
     if is_paired:
-        text += "• /add — Cria um novo evento (pessoal ou compartilhado).\n"
-        text += "• /hoje — Consulta os compromissos do dia.\n"
-        text += "• /semana — Consulta os compromissos dos próximos 7 dias.\n"
-        text += "• /eventos — Lista os próximos eventos cadastrados.\n"
-        text += "• /delete — Permite excluir um compromisso existente.\n"
+        text += "• /add | /novo — Criar evento / New event\n"
+        text += "• /hoje | /today — Compromissos de hoje / Today's events\n"
+        text += "• /semana | /week — Próximos 7 dias / Next 7 days\n"
+        text += "• /eventos | /events — Lista de eventos / All events\n"
+        text += "• /delete | /excluir — Excluir evento / Delete event\n"
+        text += "• /cancelar | /cancel — Cancelar fluxo / Cancel action\n"
     else:
-        text += "\n⚠️ *Atenção:* Vocês ainda não estão vinculados como casal. Use o menu abaixo para criar ou entrar em um casal."
+        text += "• /criar\\_casal | /create\\_couple — Gerar código / Create couple invite\n"
+        text += "• /entrar\\_casal | /join\\_couple — Entrar com código / Join couple\n"
+        text += "\n⚠️ *Atenção:* Vocês ainda não estão vinculados como casal. Use o menu abaixo para conectar-se ao seu parceiro."
 
     keyboard = get_main_menu_keyboard(is_paired=is_paired, has_pending_invite=has_pending_invite)
 

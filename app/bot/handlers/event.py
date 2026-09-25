@@ -390,7 +390,7 @@ def get_add_event_conversation_handler() -> ConversationHandler:
     return ConversationHandler(
         entry_points=[
             CallbackQueryHandler(start_add_event, pattern="^menu_add_event$"),
-            CommandHandler("add", start_add_event),
+            CommandHandler(["add", "adicionar", "novo", "criar", "new", "create"], start_add_event),
         ],
         states={
             EVENT_TITLE: [
@@ -417,7 +417,7 @@ def get_add_event_conversation_handler() -> ConversationHandler:
         },
         fallbacks=[
             CallbackQueryHandler(cancel_event, pattern="^cancel_event$"),
-            CommandHandler("cancelar", cancel_event),
+            CommandHandler(["cancelar", "cancel"], cancel_event),
         ],
         per_message=False,
     )

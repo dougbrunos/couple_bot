@@ -47,24 +47,24 @@ def create_app():
     app.add_handler(get_join_couple_conversation_handler())
 
     # Comandos de navegação e menu
-    app.add_handler(CommandHandler(["start", "menu"], start_handler))
+    app.add_handler(CommandHandler(["start", "menu", "iniciar"], start_handler))
     app.add_handler(CommandHandler(["help", "ajuda"], help_handler))
     app.add_handler(CallbackQueryHandler(start_handler, pattern="^menu_main$"))
 
     # Gestão de Casal
-    app.add_handler(CommandHandler("criar_casal", create_couple_handler))
+    app.add_handler(CommandHandler(["criar_casal", "casal", "create_couple", "couple"], create_couple_handler))
     app.add_handler(CallbackQueryHandler(create_couple_handler, pattern="^(menu_create_couple|menu_view_invite)$"))
 
     # Consultas de compromissos
-    app.add_handler(CommandHandler("hoje", today_handler))
+    app.add_handler(CommandHandler(["hoje", "today"], today_handler))
     app.add_handler(CallbackQueryHandler(today_handler, pattern="^menu_today$"))
-    app.add_handler(CommandHandler("semana", week_handler))
+    app.add_handler(CommandHandler(["semana", "week"], week_handler))
     app.add_handler(CallbackQueryHandler(week_handler, pattern="^menu_week$"))
-    app.add_handler(CommandHandler("eventos", events_list_handler))
+    app.add_handler(CommandHandler(["eventos", "events", "listar", "list"], events_list_handler))
     app.add_handler(CallbackQueryHandler(events_list_handler, pattern="^menu_events$"))
 
     # Exclusão de eventos
-    app.add_handler(CommandHandler("delete", delete_menu_handler))
+    app.add_handler(CommandHandler(["delete", "deletar", "excluir", "remover", "remove"], delete_menu_handler))
     app.add_handler(CallbackQueryHandler(delete_menu_handler, pattern="^menu_delete$"))
     app.add_handler(CallbackQueryHandler(confirm_delete_prompt_handler, pattern=r"^del_sel_\d+$"))
     app.add_handler(CallbackQueryHandler(execute_delete_handler, pattern=r"^del_confirm_\d+$"))

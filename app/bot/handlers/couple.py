@@ -167,7 +167,7 @@ def get_join_couple_conversation_handler() -> ConversationHandler:
     return ConversationHandler(
         entry_points=[
             CallbackQueryHandler(prompt_join_couple, pattern="^menu_join_couple$"),
-            CommandHandler("entrar_casal", prompt_join_couple),
+            CommandHandler(["entrar_casal", "entrar", "join_couple", "join"], prompt_join_couple),
         ],
         states={
             AWAITING_INVITE_CODE: [
@@ -176,7 +176,7 @@ def get_join_couple_conversation_handler() -> ConversationHandler:
         },
         fallbacks=[
             CallbackQueryHandler(cancel_join, pattern="^cancel_join_couple$"),
-            CommandHandler("cancelar", cancel_join),
+            CommandHandler(["cancelar", "cancel"], cancel_join),
         ],
         per_message=False,
     )

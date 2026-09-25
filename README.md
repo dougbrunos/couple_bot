@@ -166,17 +166,20 @@ pytest -v
 
 ## 📖 Telegram Commands
 
-| Command | Description |
-|---|---|
-| `/start` | Starts the bot, registers the user, and opens the main menu |
-| `/menu` | Opens the couple navigation shortcuts menu |
-| `/ajuda` or `/help` | Displays help guide and command usage |
-| `/add` | Starts guided flow to create a new appointment |
-| `/hoje` | Displays today's schedule grouped by participant |
-| `/semana` | Displays the next 7 days projection |
-| `/eventos` | Lists upcoming appointments in chronological order |
-| `/delete` | Interactive menu to cancel/delete appointments |
-| `/cancelar` | Cancels any ongoing interactive conversation |
+The bot supports commands seamlessly in both English and Portuguese:
+
+| English Command | Portuguese Command | Description |
+|---|---|---|
+| `/start`, `/menu` | `/start`, `/menu`, `/iniciar` | Starts the bot and opens the main menu |
+| `/help` | `/ajuda` | Displays the help guide and command usage |
+| `/add`, `/new`, `/create` | `/add`, `/adicionar`, `/novo`, `/criar` | Starts guided flow to create a new appointment |
+| `/today` | `/hoje` | Displays today's schedule grouped by participant |
+| `/week` | `/semana` | Displays the next 7 days schedule |
+| `/events`, `/list` | `/eventos`, `/listar` | Lists upcoming appointments chronologically |
+| `/delete`, `/remove` | `/delete`, `/deletar`, `/excluir`, `/remover` | Opens interactive deletion menu with confirmation |
+| `/create_couple`, `/couple` | `/criar_casal`, `/casal` | Generates a 30-min invite code to link partners |
+| `/join_couple`, `/join` | `/entrar_casal`, `/entrar` | Prompts for an invite code to join a partner |
+| `/cancel` | `/cancelar` | Cancels any ongoing interactive conversation |
 
 ---
 

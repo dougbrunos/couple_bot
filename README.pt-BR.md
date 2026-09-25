@@ -166,17 +166,20 @@ pytest -v
 
 ## 📖 Comandos Disponíveis no Telegram
 
-| Comando | Descrição |
-|---|---|
-| `/start` | Inicia o bot, registra o usuário e apresenta o menu principal |
-| `/menu` | Abre o menu de atalhos e ações do casal |
-| `/ajuda` ou `/help` | Exibe o guia completo de uso e comandos |
-| `/add` | Inicia o fluxo conversacional para cadastrar um novo evento |
-| `/hoje` | Lista os compromissos do dia corrente agrupados por participante |
-| `/semana` | Exibe a agenda dos próximos 7 dias |
-| `/eventos` | Lista todos os próximos eventos cronológicos |
-| `/delete` | Abre a listagem de eventos com botão de cancelamento |
-| `/cancelar` | Cancela qualquer operação ou fluxo interativo em andamento |
+O bot oferece suporte completo a comandos tanto em Português quanto em Inglês:
+
+| Comando em Português | Comando em Inglês | Descrição |
+|---|---|---|
+| `/start`, `/menu`, `/iniciar` | `/start`, `/menu` | Inicia o bot, registra o usuário e apresenta o menu principal |
+| `/ajuda` | `/help` | Exibe o guia completo de uso e comandos |
+| `/add`, `/adicionar`, `/novo`, `/criar` | `/add`, `/new`, `/create` | Inicia o fluxo conversacional para cadastrar um novo evento |
+| `/hoje` | `/today` | Lista os compromissos do dia corrente agrupados por participante |
+| `/semana` | `/week` | Exibe a agenda dos próximos 7 dias |
+| `/eventos`, `/listar` | `/events`, `/list` | Lista todos os próximos eventos cronológicos |
+| `/delete`, `/deletar`, `/excluir`, `/remover` | `/delete`, `/remove` | Abre a listagem de eventos com tela de confirmação de exclusão |
+| `/criar_casal`, `/casal` | `/create_couple`, `/couple` | Gera código de convite temporário (30 min) para vincular o casal |
+| `/entrar_casal`, `/entrar` | `/join_couple`, `/join` | Permite entrar no casal usando o código do parceiro |
+| `/cancelar` | `/cancel` | Cancela qualquer operação ou fluxo interativo em andamento |
 
 ---
 
