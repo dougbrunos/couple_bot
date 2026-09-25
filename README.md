@@ -20,9 +20,9 @@ A virtual assistant for Telegram designed to help couples seamlessly organize sh
   - Recurrence rules: Daily, Weekly, Monthly, and Yearly;
   - Configurable advance reminders (10m, 30m, 1h, 1 day before).
 - 🔍 **Quick & Organized Queries:**
-  - `/hoje` — View today's schedule visually grouped by participant;
-  - `/semana` — 7-day projection displaying upcoming events and free days;
-  - `/eventos` — Chronological list of all upcoming active events.
+  - `/hoje``/today` — View today's schedule visually grouped by participant;
+  - `/semana``/week`  — 7-day projection displaying upcoming events and free days;
+  - `/eventos``/events` — Chronological list of all upcoming active events.
 - 🗑️ **Safe Event Deletion:**
   - `/delete` — Interactive list with a confirmation dialog before permanent deletion;
   - Automatic notification to partner upon cancellation of shared events;
