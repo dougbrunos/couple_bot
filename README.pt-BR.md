@@ -1,4 +1,4 @@
-# 🤖 Bot de Casal — Telegram
+# Bot de Casal — Telegram
 
 <p align="center">
   <a href="README.md">English</a> •
@@ -11,29 +11,29 @@ Assistente virtual para o Telegram projetado para casais organizarem seus compro
 
 ---
 
-## 🚀 Funcionalidades Principais
+## Funcionalidades Principais
 
-- 💑 **Vínculo Seguro de Casal:** Conexão entre os parceiros via código de convite temporário (`CASAL-XXXX`) com expiração de 30 minutos e confirmação mútua.
-- 📅 **Criação Guiada de Eventos:**
+- **Vínculo Seguro de Casal:** Conexão entre os parceiros via código de convite temporário (`CASAL-XXXX`) com expiração de 30 minutos e confirmação mútua.
+- **Criação Guiada de Eventos:**
   - Fluxo conversacional passo a passo: Título, data (`DD/MM/AAAA`) e horário (`HH:MM`) com validações de data e hora;
-  - Definição de escopo: **Pessoal** (`👤 Eu`), **Parceiro** (`👩 Ela / 👨 Ele`) ou **Compartilhado** (`❤️ Nós dois`);
+  - Definição de escopo: **Pessoal** (`Eu`), **Parceiro** (`Ela / Ele`) ou **Compartilhado** (`Nós dois`);
   - Suporte a regras de recorrência: Diária, Semanal, Mensal e Anual;
   - Lembrete com antecedência configurável (10m, 30m, 1h, 1 dia antes).
-- 🔍 **Consultas Rápidas e Organizadas:**
+- **Consultas Rápidas e Organizadas:**
   - `/hoje` — Exibe os compromissos do dia atual agrupados visualmente por participante;
   - `/semana` — Exibe a projeção dos próximos 7 dias com indicação de dias livres;
   - `/eventos` — Lista cronológica dos próximos compromissos ativos.
-- 🗑️ **Exclusão Segura e Notificação:**
+- **Exclusão Segura e Notificação:**
   - `/delete` — Menu interativo com tela de confirmação antes de remover qualquer evento;
   - Notificação automática ao parceiro em caso de cancelamento de evento compartilhado;
   - Cancelamento em cascata de lembretes pendentes no agendador.
-- ⏰ **Sistema de Lembretes Automáticos:**
+- **Sistema de Lembretes Automáticos:**
   - Notificações enviadas pelo Telegram no horário exato configurado;
-  - Ações interativas diretamente na mensagem: confirmar leitura (`[✓ OK]`) ou adiar alarme (`[⏰ Adiar]`: 10m, 30m, 1h).
+  - Ações interativas diretamente na mensagem: confirmar leitura (`[OK]`) ou adiar alarme (`[Adiar]`: 10m, 30m, 1h).
 
 ---
 
-## 🛠️ Stack Tecnológica
+## Stack Tecnológica
 
 - **Linguagem:** Python 3.12+
 - **Framework Telegram:** `python-telegram-bot` (v22+) com `JobQueue` integrado (APScheduler)
@@ -44,7 +44,7 @@ Assistente virtual para o Telegram projetado para casais organizarem seus compro
 
 ---
 
-## 📂 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 bot_telegram/
@@ -73,7 +73,7 @@ bot_telegram/
 
 ---
 
-## ⚙️ Instalação e Execução Local
+## Instalação e Execução Local
 
 ### 1. Pré-requisitos
 - Python 3.12 ou superior instalado;
@@ -127,7 +127,7 @@ O bot iniciará o `polling` e o agendador de lembretes automaticamente. No Teleg
 
 ---
 
-## ☁️ Deploy Gratuito (24/7 na Nuvem)
+## Deploy Gratuito (24/7 na Nuvem)
 
 Você pode hospedar o bot sem nenhum custo financeiro utilizando a combinação **Supabase + Render**:
 
@@ -150,7 +150,7 @@ Você pode hospedar o bot sem nenhum custo financeiro utilizando a combinação 
 
 ---
 
-## 🧪 Testes Automatizados
+## Testes Automatizados
 
 Para executar toda a suíte de testes:
 ```bash
@@ -164,7 +164,7 @@ pytest -v
 
 ---
 
-## 📖 Comandos Disponíveis no Telegram
+## Comandos Disponíveis no Telegram
 
 O bot oferece suporte completo a comandos tanto em Português quanto em Inglês:
 
@@ -184,6 +184,6 @@ O bot oferece suporte completo a comandos tanto em Português quanto em Inglês:
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto é distribuído sob a licença MIT. Sinta-se livre para usar, modificar e distribuir.

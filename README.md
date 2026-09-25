@@ -1,4 +1,4 @@
-# 🤖 Couple Bot — Telegram
+# Couple Bot — Telegram
 
 <p align="center">
   <b>English</b> •
@@ -11,29 +11,29 @@ A virtual assistant for Telegram designed to help couples seamlessly organize sh
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-- 💑 **Secure Couple Pairing:** Connect partners using a temporary invite code (`CASAL-XXXX`) with a 30-minute expiration and mutual notification.
-- 📅 **Guided Event Creation:**
+- **Secure Couple Pairing:** Connect partners using a temporary invite code (`CASAL-XXXX`) with a 30-minute expiration and mutual notification.
+- **Guided Event Creation:**
   - Step-by-step interactive flow: Title, date (`DD/MM/YYYY`), and time (`HH:MM`) with past date validation;
-  - Flexible participant scope: **Personal** (`👤 Me`), **Partner** (`👩 Her / 👨 Him`), or **Shared** (`❤️ Both of us`);
+  - Flexible participant scope: **Personal** (`Me`), **Partner** (`Her / Him`), or **Shared** (`Both of us`);
   - Recurrence rules: Daily, Weekly, Monthly, and Yearly;
   - Configurable advance reminders (10m, 30m, 1h, 1 day before).
-- 🔍 **Quick & Organized Queries:**
-  - `/hoje /today` — View today's schedule visually grouped by participant;
-  - `/semana /week`  — 7-day projection displaying upcoming events and free days;
-  - `/eventos /events` — Chronological list of all upcoming active events.
-- 🗑️ **Safe Event Deletion:**
+- **Quick & Organized Queries:**
+  - `/hoje /today` — View today's schedule visually grouped by participant;
+  - `/semana /week` — 7-day projection displaying upcoming events and free days;
+  - `/eventos /events` — Chronological list of all upcoming active events.
+- **Safe Event Deletion:**
   - `/delete` — Interactive list with a confirmation dialog before permanent deletion;
   - Automatic notification to partner upon cancellation of shared events;
   - Cascading cleanup of pending reminders from the scheduler queue.
-- ⏰ **Automated Notification System:**
+- **Automated Notification System:**
   - Direct Telegram notifications dispatched at the exact scheduled reminder time;
-  - Inline action buttons: acknowledge (`[✓ OK]`) or snooze alarm (`[⏰ Snooze]`: 10m, 30m, 1h).
+  - Inline action buttons: acknowledge (`[OK]`) or snooze alarm (`[Snooze]`: 10m, 30m, 1h).
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Language:** Python 3.12+
 - **Telegram Framework:** `python-telegram-bot` (v22+) with integrated `JobQueue` (APScheduler)
@@ -44,7 +44,7 @@ A virtual assistant for Telegram designed to help couples seamlessly organize sh
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 bot_telegram/
@@ -73,7 +73,7 @@ bot_telegram/
 
 ---
 
-## ⚙️ Local Installation & Setup
+## Local Installation & Setup
 
 ### 1. Prerequisites
 - Python 3.12 or newer installed;
@@ -127,7 +127,7 @@ The application will start long polling and register background reminder jobs. O
 
 ---
 
-## ☁️ Free Cloud Deployment (24/7 with Render & Supabase)
+## Free Cloud Deployment (24/7 with Render & Supabase)
 
 You can host this bot completely free (R$ 0 / $0) using **Supabase** + **Render**:
 
@@ -150,7 +150,7 @@ You can host this bot completely free (R$ 0 / $0) using **Supabase** + **Render*
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 To execute the test suite:
 ```bash
@@ -164,7 +164,7 @@ pytest -v
 
 ---
 
-## 📖 Telegram Commands
+## Telegram Commands
 
 The bot supports commands seamlessly in both English and Portuguese:
 
@@ -184,6 +184,6 @@ The bot supports commands seamlessly in both English and Portuguese:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License. Feel free to use, modify, and distribute.
