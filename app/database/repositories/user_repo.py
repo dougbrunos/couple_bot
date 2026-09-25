@@ -13,7 +13,9 @@ class UserRepository:
         return session.query(User).filter(User.telegram_id == telegram_id).first()
 
     @staticmethod
-    def create_or_update(session: Session, telegram_id: int, name: str) -> User:
+    def create_or_update(
+        session: Session, telegram_id: int, name: str, language: str = "pt"
+    ) -> User:
         user = UserRepository.get_by_telegram_id(session, telegram_id)
         if user:
             if user.name != name:
@@ -22,7 +24,16 @@ class UserRepository:
                 session.flush()
             return user
 
-        user = User(telegram_id=telegram_id, name=name)
+        user = User(telegram_id=telegram_id, name=name, language=language)
         session.add(user)
         session.flush()
+        return user
+
+    @staticmethod
+    def set_language(session: Session, telegram_id: int, language: str) -> Optional[User]:
+        user = UserRepository.get_by_telegram_id(session, telegram_id)
+        if user:
+            user.language = language
+            user.updated_at = utc_now()
+            session.flush()
         return user

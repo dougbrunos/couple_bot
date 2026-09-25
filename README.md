@@ -179,6 +179,7 @@ The bot supports commands seamlessly in both English and Portuguese:
 | `/delete`, `/remove` | `/delete`, `/deletar`, `/excluir`, `/remover` | Opens interactive deletion menu with confirmation |
 | `/create_couple`, `/couple` | `/criar_casal`, `/casal` | Generates a 30-min invite code to link partners |
 | `/join_couple`, `/join` | `/entrar_casal`, `/entrar` | Prompts for an invite code to join a partner |
+| `/language` | `/idioma` | Switch interface language between English and Portuguese |
 | `/cancel` | `/cancelar` | Cancels any ongoing interactive conversation |
 
 ---

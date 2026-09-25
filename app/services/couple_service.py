@@ -23,7 +23,6 @@ class CoupleService:
     def create_or_get_invite(
         cls, session: Session, telegram_id: int
     ) -> Tuple[Optional[str], Optional[datetime], str]:
-        """Gera ou recupera convite ativo."""
         user = UserRepository.get_by_telegram_id(session, telegram_id)
         if not user:
             return None, None, "USER_NOT_FOUND"
@@ -59,15 +58,10 @@ class CoupleService:
     def join_couple(
         cls, session: Session, telegram_id: int, invite_code: str
     ) -> Tuple[Optional[Couple], Optional[User], str]:
-        """Valida o convite e conecta o segundo usuário ao casal.
-        Retorna (couple, partner_user, status).
-        Possíveis status: 'OK', 'INVALID_OR_EXPIRED', 'CANNOT_PAIR_SELF', 'ALREADY_PAIRED', 'USER_NOT_FOUND'
-        """
         user = UserRepository.get_by_telegram_id(session, telegram_id)
         if not user:
             return None, None, "USER_NOT_FOUND"
 
-        # Se já pertence a um casal com duas pessoas
         existing_couple = CoupleRepository.get_by_user_id(session, user.id)
         if existing_couple and existing_couple.user_2_id is not None:
             return None, None, "ALREADY_PAIRED"
@@ -81,7 +75,6 @@ class CoupleService:
         if couple.user_1_id == user.id:
             return None, None, "CANNOT_PAIR_SELF"
 
-        # Se o usuário 2 tinha um convite pendente vazio criado anteriormente por ele mesmo, removemos
         if existing_couple and existing_couple.id != couple.id and existing_couple.user_2_id is None:
             session.delete(existing_couple)
             session.flush()

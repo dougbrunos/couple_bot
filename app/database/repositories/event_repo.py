@@ -46,7 +46,6 @@ class EventRepository:
         start_dt: datetime,
         end_dt: datetime,
     ) -> List[Event]:
-        """Lista eventos fixos que iniciam dentro de um intervalo de datas."""
         return (
             session.query(Event)
             .filter(
@@ -62,7 +61,6 @@ class EventRepository:
     def list_all_active_by_couple(
         session: Session, couple_id: int
     ) -> List[Event]:
-        """Lista todos os eventos do casal (inclusive recorrentes)."""
         return (
             session.query(Event)
             .filter(Event.couple_id == couple_id)
@@ -77,7 +75,6 @@ class EventRepository:
         from_time: Optional[datetime] = None,
         limit: int = 20,
     ) -> List[Event]:
-        """Lista os próximos eventos a partir de um momento."""
         if from_time is None:
             from_time = utc_now()
 

@@ -6,12 +6,10 @@ from app.config import config
 
 
 def utc_now() -> datetime:
-    """Retorna datetime atual em UTC naive para total compatibilidade com SQLite."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
-    """Garante que um datetime seja convertido para UTC naive."""
     if dt is None:
         return None
     if dt.tzinfo is not None:
@@ -20,7 +18,6 @@ def ensure_utc(dt: Optional[datetime]) -> Optional[datetime]:
 
 
 def to_local_tz(dt: datetime, tz_name: Optional[str] = None) -> datetime:
-    """Converte datetime UTC para o fuso horário local (padrão America/Sao_Paulo)."""
     tz = pytz.timezone(tz_name or config.TIMEZONE)
     if dt.tzinfo is None:
         dt = pytz.utc.localize(dt)
@@ -28,16 +25,13 @@ def to_local_tz(dt: datetime, tz_name: Optional[str] = None) -> datetime:
 
 
 def get_local_now(tz_name: Optional[str] = None) -> datetime:
-    """Retorna datetime atual no fuso horário local."""
     tz = pytz.timezone(tz_name or config.TIMEZONE)
     return datetime.now(tz)
 
 
-def parse_date_input(text: str, tz_name: Optional[str] = None) -> Tuple[Optional[date], Optional[str]]:
-    """Faz o parse e validação de data enviada pelo usuário.
-    Aceita DD/MM/AAAA ou DD/MM.
-    Retorna (data, erro).
-    """
+def parse_date_input(
+    text: str, tz_name: Optional[str] = None
+) -> Tuple[Optional[date], Optional[str]]:
     text = text.strip()
     match_full = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$", text)
     match_short = re.match(r"^(\d{1,2})[/.-](\d{1,2})$", text)
@@ -46,11 +40,14 @@ def parse_date_input(text: str, tz_name: Optional[str] = None) -> Tuple[Optional
     today = local_now.date()
 
     if match_full:
-        day, month, year = int(match_full.group(1)), int(match_full.group(2)), int(match_full.group(3))
+        day, month, year = (
+            int(match_full.group(1)),
+            int(match_full.group(2)),
+            int(match_full.group(3)),
+        )
     elif match_short:
         day, month = int(match_short.group(1)), int(match_short.group(2))
         year = today.year
-        # Se a data no ano atual já passou, assume o próximo ano
         try:
             candidate = date(year, month, day)
             if candidate < today:
@@ -72,13 +69,9 @@ def parse_date_input(text: str, tz_name: Optional[str] = None) -> Tuple[Optional
 
 
 def parse_time_input(text: str) -> Tuple[Optional[time], Optional[str]]:
-    """Faz o parse e validação de horário (HH:MM).
-    Retorna (time, erro).
-    """
     text = text.strip().replace("h", ":").replace("H", ":")
     match = re.match(r"^(\d{1,2}):(\d{2})$", text)
     if not match:
-        # Se digitou apenas o número da hora (ex: "20")
         if text.isdigit() and 0 <= int(text) <= 23:
             return time(int(text), 0), None
         return None, "Formato inválido. Por favor, envie o horário no formato HH:MM (ex: 20:00)."
@@ -91,8 +84,6 @@ def parse_time_input(text: str) -> Tuple[Optional[time], Optional[str]]:
 
 
 def combine_to_utc(d: date, t: time, tz_name: Optional[str] = None) -> datetime:
-    """Combina data e hora locais e converte para UTC naive para salvar no banco."""
     tz = pytz.timezone(tz_name or config.TIMEZONE)
     local_dt = tz.localize(datetime.combine(d, t))
-    utc_dt = local_dt.astimezone(timezone.utc)
-    return utc_dt.replace(tzinfo=None)
+    return local_dt.astimezone(timezone.utc).replace(tzinfo=None)

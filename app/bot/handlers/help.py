@@ -7,16 +7,17 @@ from app.bot.keyboards.main_menu import get_main_menu_keyboard
 
 
 async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handler para os comandos /ajuda e /help: exibe instruções e comandos do bot."""
     user = update.effective_user
     if not user:
         return
 
+    user_lang = "pt"
     with get_db() as session:
         db_user = UserRepository.get_by_telegram_id(session, user.id)
         is_paired = False
         has_pending_invite = False
         if db_user:
+            user_lang = getattr(db_user, "language", "pt") or "pt"
             couple = CoupleRepository.get_by_user_id(session, db_user.id)
             is_paired = couple is not None and couple.user_2_id is not None
             has_pending_invite = couple is not None and couple.user_2_id is None
@@ -34,12 +35,16 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         text += "• /eventos | /events — Lista de eventos / All events\n"
         text += "• /delete | /excluir — Excluir evento / Delete event\n"
         text += "• /cancelar | /cancel — Cancelar fluxo / Cancel action\n"
+        text += "• /language | /idioma — Mudar idioma / Change language\n"
     else:
         text += "• /criar\\_casal | /create\\_couple — Gerar código / Create couple invite\n"
         text += "• /entrar\\_casal | /join\\_couple — Entrar com código / Join couple\n"
+        text += "• /language | /idioma — Mudar idioma / Change language\n"
         text += "\n⚠️ *Atenção:* Vocês ainda não estão vinculados como casal. Use o menu abaixo para conectar-se ao seu parceiro."
 
-    keyboard = get_main_menu_keyboard(is_paired=is_paired, has_pending_invite=has_pending_invite)
+    keyboard = get_main_menu_keyboard(
+        is_paired=is_paired, has_pending_invite=has_pending_invite, lang=user_lang
+    )
 
     if update.message:
         await update.message.reply_text(text, reply_markup=keyboard, parse_mode="Markdown")

@@ -32,7 +32,6 @@ class ReminderRepository:
     def list_pending(
         session: Session, current_time: Optional[datetime] = None
     ) -> List[Reminder]:
-        """Busca lembretes pendentes cujo horário agendado seja menor ou igual a current_time."""
         if current_time is None:
             current_time = utc_now()
 
@@ -74,7 +73,6 @@ class ReminderRepository:
 
     @staticmethod
     def cancel_by_event_id(session: Session, event_id: int) -> int:
-        """Cancela todos os lembretes pendentes de um evento."""
         updated = (
             session.query(Reminder)
             .filter(

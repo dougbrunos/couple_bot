@@ -179,6 +179,7 @@ O bot oferece suporte completo a comandos tanto em Português quanto em Inglês:
 | `/delete`, `/deletar`, `/excluir`, `/remover` | `/delete`, `/remove` | Abre a listagem de eventos com tela de confirmação de exclusão |
 | `/criar_casal`, `/casal` | `/create_couple`, `/couple` | Gera código de convite temporário (30 min) para vincular o casal |
 | `/entrar_casal`, `/entrar` | `/join_couple`, `/join` | Permite entrar no casal usando o código do parceiro |
+| `/idioma` | `/language` | Altera o idioma da interface entre Português e Inglês |
 | `/cancelar` | `/cancel` | Cancela qualquer operação ou fluxo interativo em andamento |
 
 ---

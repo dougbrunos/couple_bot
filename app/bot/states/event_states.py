@@ -1,4 +1,3 @@
-# Estados do ConversationHandler para criação de evento
 EVENT_TITLE = 10
 EVENT_DATE = 11
 EVENT_TIME = 12
