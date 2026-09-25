@@ -1,177 +1,185 @@
-# 🤖 Bot de Casal — Telegram
+# 🤖 Couple Bot — Telegram
 
-Assistente virtual para o Telegram projetado para casais organizarem seus compromissos, rotinas e datas importantes com facilidade, notificações automáticas pontuais e sincronização em tempo real.
-
----
-
-## 🚀 Funcionalidades Principais
-
-- 💑 **Vínculo Seguro de Casal:** Conexão entre os parceiros via código de convite temporário (`CASAL-XXXX`) com expiração de 30 minutos e confirmação mútua.
-- 📅 **Criação Guiada de Eventos:**
-  - Fluxo passo a passo: Título, data (`DD/MM/AAAA`) e horário (`HH:MM`) com validações inteligentes;
-  - Definição de escopo: **Pessoal** (`👤 Eu`), **Parceiro** (`👩 Ela / 👨 Ele`) ou **Compartilhado** (`❤️ Nós dois`);
-  - Suporte a regras de recorrência: Diária, Semanal, Mensal e Anual;
-  - Lembrete com antecedência configurável (10m, 30m, 1h, 1 dia antes).
-- 🔍 **Consultas Rápidas e Organizadas:**
-  - `/hoje` — Exibe os compromissos do dia atual agrupados visualmente por participante;
-  - `/semana` — Exibe a projeção dos próximos 7 dias com indicação de dias livres;
-  - `/eventos` — Lista cronológica dos próximos compromissos ativos.
-- 🗑️ **Exclusão Segura e Notificação:**
-  - `/delete` — Menu interativo com tela de confirmação antes de remover qualquer evento;
-  - Notificação automática ao parceiro em caso de cancelamento de evento compartilhado;
-  - Cancelamento em cascata de lembretes pendentes no agendador.
-- ⏰ **Sistema de Lembretes Automáticos:**
-  - Notificações enviadas pelo Telegram no horário exato configurado;
-  - Ações interativas diretamente na mensagem: confirmar leitura (`[✓ OK]`) ou adiar alarme (`[⏰ Adiar]`: 10m, 30m, 1h).
+<p align="center">
+  <b>English</b> •
+  <a href="README.pt-BR.md">Português (Brasil)</a>
+</p>
 
 ---
 
-## 🛠️ Stack Tecnológica
-
-- **Linguagem:** Python 3.12+
-- **Framework Telegram:** `python-telegram-bot` (v22+) com `JobQueue` integrado (APScheduler)
-- **ORM / Persistência:** `SQLAlchemy` 2.0+ com suporte unificado para **PostgreSQL** (produção via Supabase) e **SQLite** (desenvolvimento local)
-- **Driver de Banco:** `psycopg2-binary`
-- **Fuso Horário:** `pytz` (padrão `America/Sao_Paulo`)
-- **Testes Automatizados:** `pytest` + `anyio` (30 testes unitários e de integração cobrindo fluxos, persistência e segurança)
+A virtual assistant for Telegram designed to help couples seamlessly organize shared routines, appointments, and important dates with smart automated notifications and real-time syncing.
 
 ---
 
-## 📂 Estrutura do Projeto
+## 🚀 Key Features
+
+- 💑 **Secure Couple Pairing:** Connect partners using a temporary invite code (`CASAL-XXXX`) with a 30-minute expiration and mutual notification.
+- 📅 **Guided Event Creation:**
+  - Step-by-step interactive flow: Title, date (`DD/MM/YYYY`), and time (`HH:MM`) with past date validation;
+  - Flexible participant scope: **Personal** (`👤 Me`), **Partner** (`👩 Her / 👨 Him`), or **Shared** (`❤️ Both of us`);
+  - Recurrence rules: Daily, Weekly, Monthly, and Yearly;
+  - Configurable advance reminders (10m, 30m, 1h, 1 day before).
+- 🔍 **Quick & Organized Queries:**
+  - `/hoje` — View today's schedule visually grouped by participant;
+  - `/semana` — 7-day projection displaying upcoming events and free days;
+  - `/eventos` — Chronological list of all upcoming active events.
+- 🗑️ **Safe Event Deletion:**
+  - `/delete` — Interactive list with a confirmation dialog before permanent deletion;
+  - Automatic notification to partner upon cancellation of shared events;
+  - Cascading cleanup of pending reminders from the scheduler queue.
+- ⏰ **Automated Notification System:**
+  - Direct Telegram notifications dispatched at the exact scheduled reminder time;
+  - Inline action buttons: acknowledge (`[✓ OK]`) or snooze alarm (`[⏰ Snooze]`: 10m, 30m, 1h).
+
+---
+
+## 🛠️ Tech Stack
+
+- **Language:** Python 3.12+
+- **Telegram Framework:** `python-telegram-bot` (v22+) with integrated `JobQueue` (APScheduler)
+- **Database & ORM:** `SQLAlchemy` 2.0+ with seamless support for **PostgreSQL** (production via Supabase) and **SQLite** (local development)
+- **Database Driver:** `psycopg2-binary`
+- **Timezone Management:** `pytz` (default: `America/Sao_Paulo`)
+- **Automated Testing:** `pytest` + `anyio` (30 test cases covering handlers, services, database isolation, and security)
+
+---
+
+## 📂 Project Structure
 
 ```text
 bot_telegram/
 ├── app/
 │   ├── bot/
-│   │   ├── handlers/         # Handlers dos comandos, menus e conversas
-│   │   ├── keyboards/        # Teclados inline e botões interativos
-│   │   └── states/           # Estados dos fluxos (ConversationHandler)
+│   │   ├── handlers/         # Command, query, and conversation handlers
+│   │   ├── keyboards/        # Inline keyboards and navigation menus
+│   │   └── states/           # Conversation state enumerations
 │   ├── database/
-│   │   ├── database.py       # Configuração do engine SQLAlchemy e pooling
-│   │   ├── models.py         # Modelos de dados (User, Couple, Event, Reminder)
-│   │   └── repositories/     # Operações de banco de dados (CRUD) desacopladas
+│   │   ├── database.py       # Engine initialization and session factory
+│   │   ├── models.py         # SQLAlchemy data models (User, Couple, Event, Reminder)
+│   │   └── repositories/     # Decoupled database CRUD operations
 │   ├── scheduler/
-│   │   └── scheduler.py      # Worker periódico de disparo e adiamento de alertas
-│   ├── services/             # Regras de negócio e cálculo de recorrências
-│   ├── utils/                # Utilitários de data/hora e timezone
-│   └── config.py             # Validação e carregamento de variáveis de ambiente
-├── tests/                    # Bateria de testes automatizados com pytest
-├── .env.example              # Modelo seguro das variáveis necessárias
-├── .gitignore                # Proteção contra versionamento de credenciais e caches
-├── requirements.txt          # Dependências do projeto
-├── main.py                   # Ponto de entrada da aplicação
-└── README.md                 # Documentação do projeto
+│   │   └── scheduler.py      # Background worker for reminder dispatch & snoozing
+│   ├── services/             # Business logic & recurrence computation
+│   ├── utils/                # Date/time utilities and timezone conversions
+│   └── config.py             # Environment configuration & validation
+├── tests/                    # Automated test suite
+├── .env.example              # Sample environment configuration
+├── .gitignore                # Git ignore rules for secrets and caches
+├── requirements.txt          # Python dependencies
+├── main.py                   # Application entrypoint
+├── README.md                 # English documentation
+└── README.pt-BR.md           # Portuguese documentation
 ```
 
 ---
 
-## ⚙️ Instalação e Execução Local
+## ⚙️ Local Installation & Setup
 
-### 1. Pré-requisitos
-- Python 3.12 ou superior instalado;
-- Conta no Telegram.
+### 1. Prerequisites
+- Python 3.12 or newer installed;
+- A Telegram account.
 
-### 2. Criação do Bot no Telegram
-1. No Telegram, converse com o [@BotFather](https://t.me/BotFather);
-2. Envie o comando `/newbot`;
-3. Escolha o nome e o username (terminando em `bot`);
-4. Copie o token HTTP API gerado.
+### 2. Creating your Telegram Bot
+1. Open Telegram and start a chat with [@BotFather](https://t.me/BotFather);
+2. Send `/newbot`;
+3. Pick a display name and username (must end in `bot`);
+4. Copy the generated HTTP API token.
 
-### 3. Configuração do Repositório
+### 3. Clone & Environment Setup
 ```bash
-# Clone o repositório
-git clone https://github.com/SEU_USUARIO/bot_telegram.git
-cd bot_telegram
+# Clone the repository
+git clone https://github.com/dougbrunos/bot_casal.git
+cd bot_casal
 
-# Crie e ative o ambiente virtual
+# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
-# Instale as dependências
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Configuração das Variáveis de Ambiente
-Copie o arquivo de exemplo:
+### 4. Configure Environment Variables
+Copy the example template:
 ```bash
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` com suas credenciais:
+Edit `.env` with your credentials:
 ```env
-TELEGRAM_BOT_TOKEN=seu_token_gerado_no_botfather
+TELEGRAM_BOT_TOKEN=your_token_from_botfather
 DATABASE_URL=sqlite:///data/app.db
 TIMEZONE=America/Sao_Paulo
 ```
 
-> **Dica para PostgreSQL / Supabase:** Se for utilizar o Supabase, basta substituir a `DATABASE_URL`:
+> **For Supabase / PostgreSQL:** Replace `DATABASE_URL` with your connection string:
 > ```env
-> DATABASE_URL=postgresql://postgres.[REF]:[SENHA]@aws-0-[REGIAO].pooler.supabase.com:5432/postgres
+> DATABASE_URL=postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
 > ```
 
-### 5. Iniciar a Aplicação
-Com o ambiente virtual ativado:
+### 5. Run the Bot
+With your virtual environment active:
 ```bash
 python main.py
 ```
 
-O bot iniciará o `polling` e o agendador de lembretes automaticamente. No Telegram, abra a conversa com o seu bot e envie `/start`!
+The application will start long polling and register background reminder jobs. Open your bot in Telegram and send `/start` to begin!
 
 ---
 
-## ☁️ Deploy Gratuito (24/7 na Nuvem)
+## ☁️ Free Cloud Deployment (24/7 with Render & Supabase)
 
-Você pode hospedar o bot sem nenhum custo financeiro utilizando a combinação **Supabase + Render**:
+You can host this bot completely free (R$ 0 / $0) using **Supabase** + **Render**:
 
-### 1. Banco de Dados (Supabase - PostgreSQL Gratuito)
-1. Crie uma conta em [supabase.com](https://supabase.com) e inicie um novo projeto;
-2. Em **Project Settings** > **Database**, copie a **Connection String** no formato **URI**;
-3. As tabelas serão criadas de forma automática na primeira inicialização do bot.
+### 1. Database (Supabase - Free PostgreSQL)
+1. Sign up at [supabase.com](https://supabase.com) and create a project;
+2. In **Project Settings** > **Database**, copy the **URI** connection string;
+3. Database tables are generated automatically when the bot runs for the first time.
 
-### 2. Hospedagem da Aplicação (Render - Gratuito)
-1. Crie uma conta em [render.com](https://render.com) e conecte seu repositório do GitHub;
-2. Crie um novo **Web Service** (ou **Background Worker**):
+### 2. Application Hosting (Render - Free)
+1. Sign up at [render.com](https://render.com) and link your GitHub repository;
+2. Create a new **Web Service** (or **Background Worker**):
    - **Environment:** `Python 3`
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `python main.py`
-3. Na seção **Environment Variables**, cadastre as mesmas chaves do seu `.env`:
+3. Under **Environment Variables**, set the values from your `.env`:
    - `TELEGRAM_BOT_TOKEN`
    - `DATABASE_URL`
    - `TIMEZONE`
-4. Faça o deploy. O Render manterá o bot rodando e verificando os lembretes continuamente!
+4. Deploy! Render will keep the bot running and checking reminders 24/7.
 
 ---
 
-## 🧪 Testes Automatizados
+## 🧪 Running Automated Tests
 
-Para executar toda a suíte de testes:
+To execute the test suite:
 ```bash
 pytest
 ```
 
-Para executar com relatório detalhado:
+To run with verbose output:
 ```bash
 pytest -v
 ```
 
 ---
 
-## 📖 Comandos Disponíveis no Telegram
+## 📖 Telegram Commands
 
-| Comando | Descrição |
+| Command | Description |
 |---|---|
-| `/start` | Inicia o bot, registra o usuário e apresenta o menu principal |
-| `/menu` | Abre o menu de atalhos e ações do casal |
-| `/ajuda` ou `/help` | Exibe o guia completo de uso e comandos |
-| `/add` | Inicia o fluxo conversacional para cadastrar um novo evento |
-| `/hoje` | Lista os compromissos do dia corrente agrupados por participante |
-| `/semana` | Exibe a agenda dos próximos 7 dias |
-| `/eventos` | Lista todos os próximos eventos cronológicos |
-| `/delete` | Abre a listagem de eventos com botão de cancelamento |
-| `/cancelar` | Cancela qualquer operação ou fluxo interativo em andamento |
+| `/start` | Starts the bot, registers the user, and opens the main menu |
+| `/menu` | Opens the couple navigation shortcuts menu |
+| `/ajuda` or `/help` | Displays help guide and command usage |
+| `/add` | Starts guided flow to create a new appointment |
+| `/hoje` | Displays today's schedule grouped by participant |
+| `/semana` | Displays the next 7 days projection |
+| `/eventos` | Lists upcoming appointments in chronological order |
+| `/delete` | Interactive menu to cancel/delete appointments |
+| `/cancelar` | Cancels any ongoing interactive conversation |
 
 ---
 
-## 📄 Licença
+## 📄 License
 
-Este projeto é distribuído sob a licença MIT. Sinta-se livre para usar, modificar e distribuir.
+This project is licensed under the MIT License. Feel free to use, modify, and distribute.
