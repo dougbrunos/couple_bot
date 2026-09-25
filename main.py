@@ -1,5 +1,8 @@
 import logging
+import os
 import sys
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler
 
 from app.config import config
@@ -34,6 +37,34 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+
+    def log_message(self, format, *args):
+        # Silence access logs to avoid cluttering bot logs
+        pass
+
+
+def start_health_check_server():
+    port = int(os.environ.get("PORT", 8080))
+    try:
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        logger.info(f"Health check server started on port {port}.")
+    except OSError as e:
+        logger.warning(f"Could not start health check server on port {port}: {e}")
 
 
 def create_app():
@@ -90,6 +121,7 @@ def create_app():
 
 def main():
     try:
+        start_health_check_server()
         app = create_app()
         logger.info("Couple Bot started successfully. Listening for updates...")
         app.run_polling()
